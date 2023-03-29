@@ -1,15 +1,12 @@
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { prisma } from "~/server/db";
-import { appRouter } from "~/server/api/root";
-import superjson from "superjson";
 
 import { api } from "~/utils/api";
 import { PageLayout } from "~/components/layout";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
@@ -69,11 +66,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 
 // GetStaticProps is a convenient function from NextJs when we don't know the type of context
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson, // optional - adds superjson serialization
-  });
+  const ssg = generateSSGHelper();
 
   const slug = context.params?.slug;
 
